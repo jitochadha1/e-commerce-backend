@@ -6,29 +6,13 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // get all products
 router.get('/', (req, res) => {
-  Category.findAll({
+  Product.findAll({
     attributes: [
       'id',
-      'category_name'
-      [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+      'product_name'
     ],
-    order: [['created_at', 'DESC']],
-    include: [
-      {
-        model: Comment,
-        attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
-        include: {
-          model: User,
-          attributes: ['username']
-        }
-      },
-      {
-        model: User,
-        attributes: ['username']
-      }
-    ]
   })
-    .then(dbPostData => res.json(dbPostData))
+    .then(dbData => res.json(dbData))
     .catch(err => {
       console.log(err);
       res.status(500).json(err);
@@ -48,9 +32,18 @@ router.get('/:id', (req, res) => {
       {
         model: Category
       },{
-        model: Tag
+        model: Tag,
+        as: 'product_tags'
       }
     ]
+  }).then(result => {
+    if(!result){
+      return res.status(404).json({message: 'No product was found with ythat ID'})
+    }
+    return res.status(200).json(result)
+  }).catch(err => {
+    console.log(err)
+    return res.status(500).json(err);
   })
 });
 
@@ -130,6 +123,20 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
+  Product.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+  .then(data => {
+    if(!data){
+      return res.status(404).json({ message: 'No product was found with this ID'})
+    }
+    return res.json(data)
+  }).catch(err => {
+    console.log(err)
+    return res.status(500).json(err);
+  })
 });
 
 module.exports = router;
