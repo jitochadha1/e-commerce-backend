@@ -45,7 +45,6 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   // create a new category
-  console.log('REQ', req.body);
   Category.create({
     category_name: req.body.name
   }).then(result => res.json(result))
@@ -70,7 +69,7 @@ router.put('/:id', (req, res) => {
       return res.status(200).json(updatedData);
     }).catch(err => {
       console.log(err);
-      return res.status(500).json(er)
+      return res.status(500).json(err)
     })
 });
 
